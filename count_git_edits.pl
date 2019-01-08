@@ -77,7 +77,7 @@ sub contributor_count_branch($$$$) {
 
 # Params:
 # -Directory
-# -Start time (UNIX)
+# -Start time
 # returns a reference to a hash mapping usernames to
 # the number of edits since this start across all branches
 sub count_edits($$) {
@@ -103,7 +103,7 @@ sub count_edits($$) {
 sub usage() {
     print "Takes the following params:\n";
     print "-Directory containing repository\n";
-    print "-When to start looking at commits\n";
+    print "-When to start looking at commits, as interpreted by git branch's --since\n";
 }
 
 # ---BEGIN MAIN CODE---
