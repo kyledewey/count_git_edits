@@ -47,18 +47,20 @@ sub list_branches($) {
 # -Directory
 # -Branch
 # -Start time
+# -End time
 # -Reference to hash of contributor -> counts
 # Updates the hash in place to reflect this branch
-sub contributor_count_branch($$$$) {
+sub contributor_count_branch($$$$$) {
     my ($directory,
         $branch,
         $start_time,
+        $end_time,
         $counts_ref) = @_;
     command_with_directory($directory,
                            "git checkout $branch");
     my $author = undef;
     my @output = command_with_directory($directory,
-                                        "git log $branch --since '$start_time' --format='COMMIT,%cn,%ce' --numstat");
+                                        "git log $branch --since '$start_time' --until '$end_time' --format='COMMIT,%cn,%ce' --numstat");
     foreach my $line (@output) {
         chomp($line);
         if ($line =~ /^COMMIT,([^,]*),([^,]*)$/) {
@@ -78,10 +80,13 @@ sub contributor_count_branch($$$$) {
 # Params:
 # -Directory
 # -Start time
+# -End time
 # returns a reference to a hash mapping usernames to
 # the number of edits since this start across all branches
-sub count_edits($$) {
-    my ($directory, $start_time) = @_;
+sub count_edits($$$) {
+    my ($directory,
+        $start_time,
+        $end_time) = @_;
     my %retval;
     
     # make sure we're up to date
@@ -94,6 +99,7 @@ sub count_edits($$) {
         contributor_count_branch($directory,
                                  $branch,
                                  $start_time,
+                                 $end_time,
                                  \%retval);
     }
 
@@ -103,14 +109,15 @@ sub count_edits($$) {
 sub usage() {
     print "Takes the following params:\n";
     print "-Directory containing repository\n";
-    print "-When to start looking at commits, as interpreted by git branch's --since\n";
+    print "-When to start looking at commits, as interpreted by git log's --since\n";
+    print "-When to stop looking at commits, as interpreted by git log's --until\n";
 }
 
 # ---BEGIN MAIN CODE---
-if (scalar(@ARGV) != 2) {
+if (scalar(@ARGV) != 3) {
     usage();
 } else {
-    my $counts_ref = count_edits($ARGV[0], $ARGV[1]);
+    my $counts_ref = count_edits($ARGV[0], $ARGV[1], $ARGV[2]);
     foreach my $author (sort(keys(%{$counts_ref}))) {
         my $edits = $counts_ref->{$author};
         print "$author: $edits\n";
