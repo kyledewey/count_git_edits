@@ -57,10 +57,10 @@ sub contributor_count_branch($$$$$) {
         $end_time,
         $counts_ref) = @_;
     command_with_directory($directory,
-                           "git checkout $branch");
+                           "git checkout \"$branch\"");
     my $author = undef;
     my @output = command_with_directory($directory,
-                                        "git log $branch --since '$start_time' --until '$end_time' --format='COMMIT,%an,%ae' --numstat");
+                                        "git log \"$branch\" --since '$start_time' --until '$end_time' --format='COMMIT,%an,%ae' --numstat");
     foreach my $line (@output) {
         chomp($line);
         if ($line =~ /^COMMIT,([^,]*),([^,]*)$/) {
